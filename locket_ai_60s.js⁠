@@ -1,0 +1,37 @@
+/********************************格
+ * Tên script: Locket AI & 60s Enabler
+ * Mô tả: Can thiệp cấu hình Remote Config của Firebase để ép bật tính năng 60s và Locket AI
+ **********************************/
+
+let body = $response.body;
+
+try {
+    let obj = JSON.parse(body);
+
+    // Kiểm tra và ép giá trị cấu hình nếu đối tượng parameters tồn tại
+    if (obj && obj.parameters) {
+        
+        // 1. Ép bật thời gian quay video lên 60 giây
+        if (obj.parameters.max_video_length) {
+            obj.parameters.max_video_length.defaultValue = { "value": "60" };
+        } else {
+            obj.parameters.max_video_length = { "defaultValue": { "value": "60" } };
+        }
+
+        // 2. Ép bật các cờ tính năng AI của Locket
+        let aiFlags = ["locket_ai_enabled", "ai_features_enabled", "ai_photo_filter", "enable_locket_ai"];
+        aiFlags.forEach(flag => {
+            if (obj.parameters[flag]) {
+                obj.parameters[flag].defaultValue = { "value": "true" };
+            } else {
+                obj.parameters[flag] = { "defaultValue": { "value": "true" } };
+            }
+        });
+    }
+
+    body = JSON.stringify(obj);
+} catch (e) {
+    console.log("Lỗi xử lý Locket AI & 60s script: " + e);
+}
+
+$done({ body });
